@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: ShellCheck y sintaxis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ShellCheck
+        run: shellcheck -x -S warning bin/androiddev install.sh uninstall.sh lib/*.sh tests/run-tests.sh
+      - name: Sintaxis Bash
+        run: bash -n bin/androiddev install.sh uninstall.sh lib/*.sh tests/run-tests.sh
+
+  test:
+    name: Pruebas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ejecutar pruebas
+        run: ./tests/run-tests.sh
+
+  distro-smoke:
+    name: Detección en ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - debian:12
+          - fedora:41
+          - archlinux:latest
+          - opensuse/tumbleweed:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Comprobar distro y gestor
+        run: |
+          docker run --rm -v "$PWD":/src -w /src "${{ matrix.image }}" bash -c '
+            source lib/common.sh
+            source lib/os.sh
+            load_os_release
+            printf "%s -> %s\n" "$OS_NAME" "$PM"
+            test "$PM" != "desconocido"
+          '

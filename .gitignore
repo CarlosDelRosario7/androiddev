@@ -1,0 +1,20 @@
+# Dependencias y artefactos de proyectos Capacitor
+node_modules/
+android/
+.gradle/
+*.apk
+*.aab
+local.properties
+
+# Salidas y registros
+dist/
+build/
+*.log
+
+# Pruebas
+tests/tmp/
+
+# Editores y sistema
+.idea/
+.vscode/
+.DS_Store
